@@ -4,4 +4,5 @@ $ext_info = array(
 	'website'		=> 'http://futurebb.futuresight.org/extensions/directimageuploading',
 	'support'		=> 'http://futuresight.org/support',
 	'uninstallable'	=> true,
+	'minversion' 	=> 1.4
 );

@@ -7,7 +7,7 @@
 	<body>
 		<div id="futurebb">
 			<?php
-			if (isset($_FILES['image'])) {
+			if (isset($_FILES['image']) && $futurebb_user['g_upload_images']) {
 				if (isset($_FILES['image']['error']) && $_FILES['image']['error'] != 0) {
 					echo '<p>';
 					switch ($_FILES['image']['error']) {
@@ -34,17 +34,27 @@
 							break;
 					}
 					echo ' (<a href="' . $base_config['baseurl'] . '/extensions/uploadimage">' . translate('tryagain') . '</a>)</p>';
+				} else if ($_FILES['image']['size'] > $futurebb_config['user_image_maxsize'] * 1024) {
+					echo '<p>The image you uploaded is too big. The maximum allowed size is ' . $futurebb_config['user_image_maxsize'] . ' KiB. (<a href="' . $base_config['baseurl'] . '/extensions/uploadimage">' . translate('tryagain') . '</a>)</p>';
 				} else {
-					$ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-					if (in_array($ext, array('png', 'jpg', 'gif', 'bmp'))) {
-						$db->query('INSERT INTO `#^userimages`(filename,user,time,extension) VALUES(\'' . $db->escape(basename($_FILES['image']['name'])) . '\',' . $futurebb_user['id'] . ',' . time() . ',\'' . $db->escape($ext) . '\')') or enhanced_error('Failed to insert image', true);
+					list($width, $height, $type,) = @getimagesize($_FILES['image']['tmp_name']);
+					$ext_mappings = array(
+						IMAGETYPE_GIF => 'gif',
+						IMAGETYPE_JPEG => 'jpg',
+						IMAGETYPE_PNG => 'png'
+					);
+					if (empty($width) || empty($height) || $width > $futurebb_config['user_image_maxwidth'] || $height > $futurebb_config['user_image_maxheight']) {
+						echo '<p>The image you uploaded is too big. The maximum allowed dimensions are ' . $futurebb_config['user_image_maxwidth'] . 'x' . $futurebb_config['user_image_maxheight'] . ' pixels. (<a href="' . $base_config['baseurl'] . '/extensions/uploadimage">' . translate('tryagain') . '</a>)</p>';
+					} else if (!array_key_exists($type, $ext_mappings)) {
+						?>
+						<p>The file you uploaded does not appear to be a valid image. (<a href="<?php echo $base_config['baseurl']; ?>/extensions/uploadimage"><?php echo translate('tryagain'); ?></a>)</p>
+						<?php
+					} else {
+						$ext = $ext_mappings[$type];
+						$db->query('INSERT INTO `#^userimages`(filename,user,ip_addr,time,extension) VALUES(\'' . $db->escape(basename($_FILES['image']['name'])) . '\',' . $futurebb_user['id'] . ',\'' . $db->escape($_SERVER['REMOTE_ADDR']) . '\',' . time() . ',\'' . $db->escape($ext) . '\')') or enhanced_error('Failed to insert image', true);
 						move_uploaded_file($_FILES['image']['tmp_name'], FORUM_ROOT . '/static/userimages/' . intval($db->insert_id()) . '.' . $ext);
 						?>
 						<p>Your image: <br /><img src="<?php echo $base_config['baseurl']; ?>/static/userimages/<?php echo $db->insert_id(); ?>.<?php echo htmlspecialchars($ext); ?>" alt="<?php echo htmlspecialchars($_FILES['image']['name']); ?>" style="max-width:48px; max-height:48px" /><br /><input type="text" readonly="readonly" value="[img]<?php echo htmlspecialchars($base_config['baseurl']); ?>/static/userimages/<?php echo $db->insert_id() . '.' . $ext; ?>[/img]" size="50" /><br /><a href="<?php echo $base_config['baseurl']; ?>/extensions/uploadimage">Upload another image</a></p>
-						<?php
-					} else {
-						?>
-						<p>The file you uploaded does not appear to be a valid image.</p>
 						<?php
 					}
 				}
@@ -63,6 +73,7 @@
 					}
 					echo '</table>';
 				}
+				echo '<p><a href="' . $base_config['baseurl'] . '/myimages" target="_BLANK">View all of your images</a></p>';
 				?>
 			</form>
 				<?php

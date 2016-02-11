@@ -10,6 +10,9 @@ ExtensionConfig::add_page('/admin/imageuploading', array('file' => 'admin/imageu
 ExtensionConfig::add_admin_menu('imageuploading', 'imageuploading');
 ExtensionConfig::add_page('/myimages', array('file' => 'myimages.php', 'template' => true));
 
+set_config('user_image_maxwidth', 1024);
+set_config('user_image_maxheight', 768);
+set_config('user_image_maxsize', 512);
 
 $table = new DBTable('userimages');
 $new_fld = new DBField('id','INT');
@@ -38,3 +41,5 @@ $new_fld = new DBField('g_upload_images', 'TINYINT(1)');
 $new_fld->add_extra('NOT_NULL');
 $new_fld->set_default(0);
 $db->add_field('user_groups', $new_fld, 'g_post_images');
+
+$db->query('UPDATE `#^user_groups` SET g_upload_images=1 WHERE g_permanent=1') or enhanced_error('Failed to update user groups', true);

@@ -1,6 +1,6 @@
 <?php
 ExtensionConfig::remove_language_key('imageuploading');
-ExtensionConfig::remove-page('/extensions/uploadimage');
+ExtensionConfig::remove_page('/extensions/uploadimage');
 ExtensionConfig::remove_page('/admin/imageuploading', array('file' => 'admin/imageuploading.php', 'template' => true, 'nocontentbox' => true, 'admin' => true));
 ExtensionConfig::remove_admin_menu('imageuploading');
 ExtensionConfig::remove_page('/myimages');

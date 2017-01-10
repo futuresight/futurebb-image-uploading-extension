@@ -24,11 +24,11 @@ $result = $db->query('SELECT id,extension,time,filename,ip_addr FROM `#^userimag
 if ($db->num_rows($result)) {
 	echo '<p>Pages: ' . paginate('<a href="' . $base_config['baseurl'] . '/' .  htmlspecialchars($dirs[1]) . '?page=$page$"$bold$>$page$</a>', $page, ceil($num_images / 20)) . '</p>';
 	echo '<table border="0px">';
-	echo '<tr><th>Image</th><th>Time</th><th>Code</th>';
+	echo '<tr><th>Image</th><th>Time</th>';
 	if ($futurebb_user['g_admin_privs'] || ($futurebb_user['g_mod_privs'] && $futurebb_user['g_mod_view_ip'])) {
 		echo '<th>IP address</th>';
 	}
-	echo '</tr>';
+	echo '<th>Code</th></tr>';
 	while ($img = $db->fetch_assoc($result)) {
 		echo '<tr>
 			<td><img src="' . htmlspecialchars($base_config['baseurl']) . '/static/userimages/' . $img['id'] . '.' . $img['extension'] . '" alt="' . htmlspecialchars($img['filename']) . '" style="max-width:48px; max-height:48px" /></td>
